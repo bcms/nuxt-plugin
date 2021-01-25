@@ -1,7 +1,30 @@
 import { Module } from '@nuxt/types';
-import { BCMSMostConfig, BCMSMostCacheContent } from '@becomes/cms-most/types';
-import { BCMSMost } from '@becomes/cms-most';
+import { BCMSMostConfig } from '@becomes/cms-most/types';
+import { BCMSMost, BCMSMostPrototype } from '@becomes/cms-most';
 import { BCMSMostCacheHandler } from '@becomes/cms-most/handlers/cache';
+
+let bcmsMost: BCMSMostPrototype;
+
+/* 
+  Initializing BCMS
+*/
+
+function initBcmsMost(): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      await bcmsMost.pipe.initialize(3001, async () => {});
+
+      return resolve();
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
+}
+
+/* 
+  Main module
+*/
 
 const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
   const options: BCMSMostConfig = {
@@ -40,28 +63,31 @@ const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
         },
   };
 
-  const bcmsMost = BCMSMost(config);
+  bcmsMost = BCMSMost(config);
 
-  BCMSMostCacheHandler();
+  /* 
+    On Nuxt init
+  */
 
   this.nuxt.hook('ready', async () => {
-    await bcmsMost.pipe
-      .initialize(3001, async () => {
-        // Live reload on data entry
-      })
-      .catch((error) => {
-        console.error(error);
-        process.exit(1);
-      });
+    if (process.env.NODE_ENV === 'production') return;
 
-    const content: BCMSMostCacheContent = await bcmsMost.cache.get.content();
+    await initBcmsMost();
+
+    const content = await bcmsMost.cache.get.content();
 
     console.log(content);
   });
 
+  /* 
+    After Nuxt has finished generating static files
+  */
+
   this.nuxt.hook('generate:done', () => {
-    console.log('On post build');
-    console.log('options', options);
+    bcmsMost.pipe.postBuild('dist').catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
   });
 };
 
