@@ -4,7 +4,8 @@
   "description": "Nuxt plugin for BCMS",
   "main": "./dist/module.js",
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "build:watch": "tsc -w"
   },
   "repository": {
     "type": "git",
