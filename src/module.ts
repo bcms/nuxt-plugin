@@ -96,6 +96,12 @@ const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
   });
 };
 
+declare module '@nuxt/types' {
+  interface Context {
+    $bcms: any;
+  }
+}
+
 export default nuxtModule;
 
 // REQUIRED if publishing the module as npm package

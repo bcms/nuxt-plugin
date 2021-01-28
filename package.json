@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Nuxt plugin for BCMS",
   "main": "./dist/module.js",
+  "types": "./dist/module.d.ts",
   "scripts": {
     "build": "tsc -p .",
     "build:watch": "tsc -w"
