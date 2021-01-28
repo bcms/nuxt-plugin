@@ -1,7 +1,7 @@
+import * as path from 'path';
 import { Module } from '@nuxt/types';
 import { BCMSMostConfig } from '@becomes/cms-most/types';
 import { BCMSMost, BCMSMostPrototype } from '@becomes/cms-most';
-import { BCMSMostCacheHandler } from '@becomes/cms-most/handlers/cache';
 
 let bcmsMost: BCMSMostPrototype;
 
@@ -76,7 +76,12 @@ const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
 
     const content = await bcmsMost.cache.get.content();
 
-    console.log(content);
+    this.nuxt.options.publicRuntimeConfig.cacheContent = content;
+
+    this.addPlugin({
+      src: path.resolve(__dirname, 'plugin.js'),
+      fileName: 'bcms-most.js',
+    });
   });
 
   /* 
