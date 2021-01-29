@@ -6,10 +6,10 @@ declare module '@nuxt/types' {
   }
 }
 
-const nuxtPlugin: Plugin = (context) => {
+const nuxtPlugin: Plugin = (context, inject) => {
   const content = context.$config.cacheContent;
 
-  context.$bcms = content;
+  inject('bcms', content);
 };
 
 export default nuxtPlugin;
