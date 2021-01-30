@@ -80,7 +80,7 @@ const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
 
     this.addPlugin({
       src: path.resolve(__dirname, 'plugin.js'),
-      fileName: 'bcms-most.js',
+      fileName: 'bcms.js',
     });
   });
 
