@@ -9,7 +9,7 @@ const nuxtPlugin: Plugin = (context, inject) => {
   const content: BCMSMostCacheContent = context.$config.cacheContent;
 
   const bcms: BCMS = {
-    findOne(entry: string, entryId: string): BCMSMostCacheContentItem {
+    findOne(entry, entryId) {
       if (!content[entry]) {
         throw Error(`Content with entry "${entry}" does not exist`);
       }
@@ -24,7 +24,7 @@ const nuxtPlugin: Plugin = (context, inject) => {
 
       return foundEntry;
     },
-    find(entry: string): BCMSMostCacheContentItem[] {
+    find(entry) {
       if (!content[entry]) {
         throw Error(`Content with entry "${entry}" does not exist`);
       }
