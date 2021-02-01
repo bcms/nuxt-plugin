@@ -22,11 +22,33 @@ function initBcmsMost(): Promise<void> {
   });
 }
 
+function attachToRuntime(nuxt, addPlugin): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const content = await bcmsMost.cache.get.content();
+
+      nuxt.options.publicRuntimeConfig.cacheContent = content;
+
+      addPlugin({
+        src: path.resolve(__dirname, 'plugin.js'),
+        fileName: 'bcms.js',
+      });
+
+      return resolve();
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
+}
+
 /* 
   Main module
 */
 
 const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
+  const { nuxt, addPlugin } = this;
+
   const options: BCMSMostConfig = {
     ...this.options.bcms,
     ...moduleOptions,
@@ -69,30 +91,25 @@ const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
     On Nuxt init
   */
 
-  this.nuxt.hook('ready', async () => {
-    if (process.env.NODE_ENV === 'production') return;
+  nuxt.hook('ready', async () => {
+    if (nuxt.options._build) {
+      await initBcmsMost();
+    }
 
-    await initBcmsMost();
-
-    const content = await bcmsMost.cache.get.content();
-
-    this.nuxt.options.publicRuntimeConfig.cacheContent = content;
-
-    this.addPlugin({
-      src: path.resolve(__dirname, 'plugin.js'),
-      fileName: 'bcms.js',
-    });
+    await attachToRuntime(nuxt, addPlugin);
   });
 
   /* 
-    After Nuxt has finished generating static files
+  After Nuxt has finished generating static files
   */
 
-  this.nuxt.hook('generate:done', () => {
-    bcmsMost.pipe.postBuild('dist').catch((error) => {
+  nuxt.hook('generate:done', async () => {
+    try {
+      await bcmsMost.pipe.postBuild('dist');
+    } catch (error) {
       console.error(error);
       process.exit(1);
-    });
+    }
   });
 };
 
