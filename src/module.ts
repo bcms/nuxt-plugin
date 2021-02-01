@@ -1,9 +1,62 @@
-import * as path from 'path';
-import { Module } from '@nuxt/types';
-import { BCMSMostConfig } from '@becomes/cms-most/types';
-import { BCMSMost, BCMSMostPrototype } from '@becomes/cms-most';
+import * as path from "path";
+import * as http from "http";
+import { Module } from "@nuxt/types";
+import {
+  BCMSMostCacheContent,
+  BCMSMostCacheContentItem,
+  BCMSMostConfig,
+} from "@becomes/cms-most/types";
+import { BCMSMost, BCMSMostPrototype } from "@becomes/cms-most";
+
+process.env.NUXT_BCMS_LOCAL = "true";
 
 let bcmsMost: BCMSMostPrototype;
+const contentServer = http.createServer(async (req, res) => {
+  console.log(req.url);
+  let rawBody = "";
+  req.on("data", (chunk) => {
+    rawBody += chunk;
+  });
+  req.on("end", async () => {
+    const body: {
+      type: "find" | "findOne";
+      key: string;
+      query: string;
+    } = JSON.parse(rawBody);
+    const query: (
+      item: BCMSMostCacheContentItem,
+      content: BCMSMostCacheContent
+    ) => Promise<any> = eval(body.query);
+    const content = JSON.parse(
+      JSON.stringify(await bcmsMost.cache.get.content())
+    );
+    if (!content[body.key]) {
+      res.write(
+        JSON.stringify({
+          message: `Content items for "${body.key}" do not exist.`,
+        })
+      );
+    } else {
+      const output: unknown[] = [];
+      for (let i = 0; i < content[body.key].length; i++) {
+        const result = await query(content[body.key][i], content);
+        if (result) {
+          output.push(result);
+          if (body.type === "findOne") {
+            break;
+          }
+        }
+      }
+      res.setHeader("Content-Type", "application/json");
+      if (body.type === "findOne") {
+        res.write(JSON.stringify(output[0]));
+      } else {
+        res.write(JSON.stringify(output));
+      }
+    }
+    res.end();
+  });
+});
 
 /* 
   Initializing BCMS
@@ -25,13 +78,13 @@ function initBcmsMost(): Promise<void> {
 function attachToRuntime(nuxt, addPlugin): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      const content = await bcmsMost.cache.get.content();
+      // const content = await bcmsMost.cache.get.content();
 
-      nuxt.options.publicRuntimeConfig.cacheContent = content;
+      // nuxt.options.publicRuntimeConfig.cacheContent = content;
 
       addPlugin({
-        src: path.resolve(__dirname, 'plugin.js'),
-        fileName: 'bcms.js',
+        src: path.resolve(__dirname, "plugin.js"),
+        fileName: "bcms.js",
       });
 
       return resolve();
@@ -46,22 +99,22 @@ function attachToRuntime(nuxt, addPlugin): Promise<void> {
   Main module
 */
 
-const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
+const nuxtModule: Module<BCMSMostConfig> = async function(moduleOptions) {
   const { nuxt, addPlugin } = this;
 
-  const options: BCMSMostConfig = {
-    ...this.options.bcms,
-    ...moduleOptions,
-  };
+  // const options: BCMSMostConfig = {
+  //   ...this.options.bcms,
+  //   ...moduleOptions,
+  // };
 
   const config: BCMSMostConfig = {
-    cms: options.cms,
-    entries: options.entries ? options.entries : [],
-    functions: options.functions ? options.functions : [],
-    media: options.media
-      ? options.media
+    cms: moduleOptions.cms,
+    entries: moduleOptions.entries ? moduleOptions.entries : [],
+    functions: moduleOptions.functions ? moduleOptions.functions : [],
+    media: moduleOptions.media
+      ? moduleOptions.media
       : {
-          output: 'static/media',
+          output: "static/media",
           sizeMap: [
             {
               width: 350,
@@ -85,27 +138,33 @@ const nuxtModule: Module<BCMSMostConfig> = function(moduleOptions) {
         },
   };
 
-  bcmsMost = BCMSMost(config);
+  if (!bcmsMost) {
+    bcmsMost = BCMSMost(config);
+    await initBcmsMost();
+    contentServer.listen(3002);
+  }
+  await attachToRuntime(nuxt, addPlugin);
 
   /* 
     On Nuxt init
   */
 
-  nuxt.hook('ready', async () => {
-    if (nuxt.options._build) {
-      await initBcmsMost();
-    }
+  // nuxt.hook('ready', async () => {
+  //   if (nuxt.options._build) {
+  //     await initBcmsMost();
+  //   }
+  //   await attachToRuntime(nuxt, addPlugin);
+  // });
 
-    await attachToRuntime(nuxt, addPlugin);
-  });
+  // /*
+  // After Nuxt has finished generating static files
+  // */
 
-  /* 
-  After Nuxt has finished generating static files
-  */
-
-  nuxt.hook('generate:done', async () => {
+  nuxt.hook("generate:done", async () => {
     try {
-      await bcmsMost.pipe.postBuild('dist');
+      contentServer.close();
+      await bcmsMost.pipe.postBuild("dist");
+      bcmsMost = undefined;
     } catch (error) {
       console.error(error);
       process.exit(1);

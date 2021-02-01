@@ -1,11 +1,11 @@
 import { Vue } from 'vue/types/vue';
-import { Module } from '@nuxt/types';
+import { Module, Context } from '@nuxt/types';
 import { Commit } from 'vuex/types/index';
-import { BCMSMostCacheContentItem } from '@becomes/cms-most/types';
+import { BCMSMostCacheContent, BCMSMostCacheContentItem } from '@becomes/cms-most/types';
 
 export interface BCMS {
-  findOne(entry: string, entryId: string): BCMSMostCacheContentItem;
-  find(entry: string): BCMSMostCacheContentItem[];
+  findOne<T>(base: string, template: string, query: (item: any, cache: any[]) => Promise<T>): Promise<T>;
+  // find(template: string): BCMSMostCacheContentItem[];
 }
 
 declare module '@nuxt/types' {
