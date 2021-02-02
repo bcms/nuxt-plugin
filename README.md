@@ -1,21 +1,8 @@
-# nuxt-plugin-bcms
+# BCMS - Nuxt Plugin
 
-## Steps to get it running
+## Development
 
-Install all the packages
-
-```
-npm install
-```
-
-Compile and watch TS files
-
-```
-npm run build:watch
-```
-
-Save the package globally to link it with the starter project
-
-```
-npm link
-```
+- Install dependencies: `npm i`,
+- Bundle the code: `npm run bundle`,
+- Link dist: `cd dist && npm i && npm link && cd ..`,
+- To update dist code, run: `npm run build`,
