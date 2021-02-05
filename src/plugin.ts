@@ -12,10 +12,20 @@ const bcmsNuxtPluginInitializer = (
     query: BCMSNuxtPluginQueryFunction<T>,
   ): Promise<T> {
     return await new Promise<T>((resolve, reject) => {
+      let queryString = query.toString();
+      if (queryString.startsWith('function (')) {
+        queryString = queryString.replace(
+          'function (',
+          '',
+        ).replace(
+          ') {',
+          ' => {',
+        );
+      }
       const data = JSON.stringify({
         type,
         key,
-        query: query.toString(),
+        query: queryString,
       });
       let rawBody = '';
       const req = http.request(
@@ -65,14 +75,21 @@ const bcmsNuxtPluginInitializer = (
 
   const bcmsNuxtPlugin: BCMSNuxtPlugin = {
     async findOne(template, query) {
-      return await send('findOne', template, query);
+      return await send(
+        'findOne',
+        template,
+        query,
+      );
     },
     async find(template, query) {
       throw Error('Not implemented.');
-    }
+    },
   };
 
-  inject('bcms', bcmsNuxtPlugin);
-}
+  inject(
+    'bcms',
+    bcmsNuxtPlugin,
+  );
+};
 
 export default bcmsNuxtPluginInitializer;
