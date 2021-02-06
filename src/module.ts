@@ -9,6 +9,7 @@ import {
   BCMSMostCacheContentItem,
   BCMSMostConfig,
 } from '@becomes/cms-most/types';
+import { Media, SocketEventName } from '@becomes/cms-client';
 import { BCMSMost, BCMSMostPrototype } from '@becomes/cms-most';
 
 let bcmsMost: BCMSMostPrototype;
@@ -16,117 +17,86 @@ let bcmsMost: BCMSMostPrototype;
 const contentServer = http.createServer(async (req, res) => {
   console.log(req.url);
   let rawBody = '';
-  res.setHeader(
-    'Access-Control-Request-Method',
-    '*',
-  );
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    '*',
-  );
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    '*',
-  );
+  res.setHeader('Access-Control-Request-Method', '*');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   if (req.method === 'OPTIONS') {
     res.end();
   } else if (req.method === 'POST') {
-    req.on(
-      'data',
-      (chunk) => {
-        rawBody += chunk;
-      },
-    );
-    req.on(
-      'end',
-      async () => {
-        res.setHeader(
-          'Content-Type',
-          'application/json',
-        );
-        let body: {
-          type: 'find' | 'findOne';
-          key: string;
-          query: string;
-        };
-        try {
-          body = JSON.parse(rawBody);
-        } catch (error) {
-          res.statusCode = 400;
-          res.write(JSON.stringify({ message: error.message }));
-        }
-        if (body) {
-          if (!body.query) {
-            res.writeHead(400);
-            res.write(JSON.stringify({ message: 'Missing query' }));
-          } else {
-            console.log('query', body.query);
-            const query: (
-              item: BCMSMostCacheContentItem,
-              content: BCMSMostCacheContent,
-            ) => Promise<any> = eval(body.query);
-            const content = JSON.parse(
-              JSON.stringify(await bcmsMost.cache.get.content()),
+    req.on('data', (chunk) => {
+      rawBody += chunk;
+    });
+    req.on('end', async () => {
+      res.setHeader('Content-Type', 'application/json');
+      let body: {
+        type: 'find' | 'findOne';
+        key: string;
+        query: string;
+      };
+      try {
+        body = JSON.parse(rawBody);
+      } catch (error) {
+        res.statusCode = 400;
+        res.write(JSON.stringify({ message: error.message }));
+      }
+      if (body) {
+        if (!body.query) {
+          res.writeHead(400);
+          res.write(JSON.stringify({ message: 'Missing query' }));
+        } else {
+          // console.log('query', body.query);
+          const query: (
+            item: BCMSMostCacheContentItem,
+            content: BCMSMostCacheContent
+          ) => Promise<any> = eval(body.query);
+          const content = JSON.parse(
+            JSON.stringify(await bcmsMost.cache.get.content())
+          );
+          if (!content[body.key]) {
+            res.write(
+              JSON.stringify({
+                message: `Content items for "${body.key}" do not exist.`,
+              })
             );
-            if (!content[body.key]) {
-              res.write(
-                JSON.stringify({
-                  message: `Content items for "${body.key}" do not exist.`,
-                }),
-              );
-            } else {
-              const output: unknown[] = [];
-              for (let i = 0; i < content[body.key].length; i++) {
-                try {
-                  const result = await query(
-                    content[body.key][i],
-                    content,
-                  );
-                  if (result) {
-                    output.push(result);
-                    if (body.type === 'findOne') {
-                      break;
-                    }
+          } else {
+            const output: unknown[] = [];
+            for (let i = 0; i < content[body.key].length; i++) {
+              try {
+                const result = await query(content[body.key][i], content);
+                if (result) {
+                  output.push(result);
+                  if (body.type === 'findOne') {
+                    break;
                   }
-                } catch (error) {
-                  console.error(error);
-                  res.statusCode = 500;
-                  res.write(JSON.stringify({ message: error.message }));
-                  res.end();
-                  return;
                 }
+              } catch (error) {
+                console.error(error);
+                res.statusCode = 500;
+                res.write(JSON.stringify({ message: error.message }));
+                res.end();
+                return;
               }
-              if (body.type === 'findOne') {
-                res.write(JSON.stringify(output[0]));
-              } else {
-                res.write(JSON.stringify(output));
-              }
+            }
+            if (body.type === 'findOne') {
+              res.write(JSON.stringify(output[0]));
+            } else {
+              res.write(JSON.stringify(output));
             }
           }
         }
-        res.end();
-      },
-    );
+      }
+      res.end();
+    });
   } else {
     const filePath = path.join(
       process.cwd(),
-      req.url.replace(
-        /../g,
-        '',
-      ).replace(
-        /\/\//g,
-        '/',
-      ),
+      req.url.replace(/../g, '').replace(/\/\//g, '/')
     );
-    const stat = await util.promisify(fs.stat)(
-      filePath);
-    res.writeHead(
-      200,
-      {
-        'Content-Type': mimeTypes.lookup(filePath) as string,
-        'Content-Length': stat.size,
-      },
-    );
+    const stat = await util.promisify(fs.stat)(filePath);
+    res.writeHead(200, {
+      'Content-Type': mimeTypes.lookup(filePath) as string,
+      'Content-Length': stat.size,
+    });
     fs.createReadStream(filePath).pipe(res);
   }
 });
@@ -137,11 +107,13 @@ const contentServer = http.createServer(async (req, res) => {
 
 async function initBcmsMost(): Promise<void> {
   try {
-    await bcmsMost.pipe.initialize(
-      3001,
-      async () => {
-      },
-    );
+    await bcmsMost.pipe.initialize(3001, async (name, data) => {
+      if (name === SocketEventName.ENTRY) {
+        if (data.type === 'update') {
+          console.log('Entry updated');
+        }
+      }
+    });
   } catch (err) {
     console.error(err);
     process.exit(1);
@@ -151,10 +123,7 @@ async function initBcmsMost(): Promise<void> {
 async function attachToRuntime(addPlugin): Promise<void> {
   try {
     await addPlugin({
-      src: path.resolve(
-        __dirname,
-        'plugin.js',
-      ),
+      src: path.resolve(__dirname, 'plugin.js'),
       fileName: 'bcms.js',
     });
   } catch (err) {
@@ -173,30 +142,30 @@ const nuxtModule: Module<BCMSMostConfig> = async function(moduleOptions) {
     entries: moduleOptions.entries ? moduleOptions.entries : [],
     functions: moduleOptions.functions ? moduleOptions.functions : [],
     media: moduleOptions.media
-           ? moduleOptions.media
-           : {
-        output: 'static/media',
-        sizeMap: [
-          {
-            width: 350,
-          },
-          {
-            width: 600,
-          },
-          {
-            width: 900,
-          },
-          {
-            width: 1200,
-          },
-          {
-            width: 1400,
-          },
-          {
-            width: 1920,
-          },
-        ],
-      },
+      ? moduleOptions.media
+      : {
+          output: 'static/media',
+          sizeMap: [
+            {
+              width: 350,
+            },
+            {
+              width: 600,
+            },
+            {
+              width: 900,
+            },
+            {
+              width: 1200,
+            },
+            {
+              width: 1400,
+            },
+            {
+              width: 1920,
+            },
+          ],
+        },
   };
 
   if (!bcmsMost) {
@@ -204,9 +173,7 @@ const nuxtModule: Module<BCMSMostConfig> = async function(moduleOptions) {
     await initBcmsMost();
     contentServer.listen(3002);
   }
-  await attachToRuntime(
-    this.addPlugin,
-  );
+  await attachToRuntime(this.addPlugin);
 
   this.nuxt.hook['generate:done'] = async () => {
     try {

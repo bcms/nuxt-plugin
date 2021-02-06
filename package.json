@@ -33,6 +33,7 @@
     "nuxt": "^2.14.12"
   },
   "dependencies": {
+    "@becomes/cms-client": "^2.0.4",
     "mime-types": "^2.1.28"
   }
 }
