@@ -4,6 +4,21 @@ const fse = require('fs-extra');
 const fs = require('fs');
 const util = require('util');
 
+/**
+ * @typedef {{
+ *   title: string,
+ *   task: (function(): Promise<void>),
+ * }} Task
+ */
+
+/**
+ * Spawn a child process.
+ *
+ * @param {string} cmd
+ * @param {string[]} args
+ * @param {any?} options
+ * @returns {Promise<void>}
+ */
 async function spawn(cmd, args, options) {
   return new Promise((resolve, reject) => {
     const proc = childProcess.spawn(
@@ -12,8 +27,8 @@ async function spawn(cmd, args, options) {
       options
         ? options
         : {
-            stdio: 'inherit',
-          }
+          stdio: 'inherit',
+        },
     );
     proc.on('close', (code) => {
       if (code !== 0) {
@@ -50,10 +65,9 @@ const parseArgs = (rawArgs) => {
   };
 };
 /**
- * @param {Array<{
- *  title: string;
- *  task: () => Promise<void>;
- * }>} tasks
+ * @param {Task[]} tasks
+ * @returns {{run: (function(): Promise<void>)}}
+ * @constructor
  */
 const Tasks = (tasks) => {
   return {
@@ -87,8 +101,6 @@ const bundle = async () => {
           'run',
           'build',
         ]);
-        // await fse.remove(path.join(__dirname, 'dist', 'types', 'index.js'));
-        // await fse.remove(path.join(__dirname, 'dist', 'types', 'index.js.map'));
       },
     },
     {
@@ -97,16 +109,16 @@ const bundle = async () => {
         const data = JSON.parse(
           (
             await util.promisify(fs.readFile)(
-              path.join(__dirname, 'package.json')
+              path.join(__dirname, 'package.json'),
             )
-          ).toString()
+          ).toString(),
         );
         data.devDependencies = undefined;
         data.nodemonConfig = undefined;
         data.scripts = undefined;
         await util.promisify(fs.writeFile)(
           path.join(__dirname, 'dist', 'package.json'),
-          JSON.stringify(data, null, '  ')
+          JSON.stringify(data, null, '  '),
         );
       },
     },
@@ -115,7 +127,7 @@ const bundle = async () => {
       task: async () => {
         await fse.copy(
           path.join(__dirname, 'LICENSE'),
-          path.join(__dirname, 'dist', 'LICENSE')
+          path.join(__dirname, 'dist', 'LICENSE'),
         );
       },
     },
@@ -124,7 +136,7 @@ const bundle = async () => {
       task: async () => {
         await fse.copy(
           path.join(__dirname, 'README.md'),
-          path.join(__dirname, 'dist', 'README.md')
+          path.join(__dirname, 'dist', 'README.md'),
         );
       },
     },
@@ -145,11 +157,11 @@ const build = async () => {
 const publish = async () => {
   if (
     await util.promisify(fs.exists)(
-      path.join(__dirname, 'dist', 'node_modules')
+      path.join(__dirname, 'dist', 'node_modules'),
     )
   ) {
     throw new Error(
-      `Please remove "${path.join(__dirname, 'dist', 'node_modules')}"`
+      `Please remove "${path.join(__dirname, 'dist', 'node_modules')}"`,
     );
   }
   await spawn('npm', ['publish', '--access=public'], {

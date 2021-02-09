@@ -71,7 +71,7 @@ const bcmsNuxtPluginInitializer = (
       return await send('findOne', template, query);
     },
     async find(template, query) {
-      throw Error('Not implemented.');
+      return await send('find', template, query);
     },
   };
 
