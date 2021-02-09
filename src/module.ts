@@ -9,13 +9,13 @@ import {
   BCMSMostCacheContentItem,
   BCMSMostConfig,
 } from '@becomes/cms-most/types';
-import { Media, SocketEventName } from '@becomes/cms-client';
+import { SocketEventName } from '@becomes/cms-client';
 import { BCMSMost, BCMSMostPrototype } from '@becomes/cms-most';
+import * as SocketIO from 'socket.io';
 
 let bcmsMost: BCMSMostPrototype;
 
 const contentServer = http.createServer(async (req, res) => {
-  console.log(req.url);
   let rawBody = '';
   res.setHeader('Access-Control-Request-Method', '*');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -100,6 +100,17 @@ const contentServer = http.createServer(async (req, res) => {
     fs.createReadStream(filePath).pipe(res);
   }
 });
+const io = new SocketIO.Server(contentServer, {
+  path: '/bcms/content/socket',
+  serveClient: false,
+  cors: {
+    allowedHeaders: '*',
+    origin: 'http://localhost:3000',
+    methods: '*',
+    credentials: true,
+  },
+  allowEIO3: true,
+});
 
 /* 
   Initializing BCMS
@@ -111,6 +122,7 @@ async function initBcmsMost(): Promise<void> {
       if (name === SocketEventName.ENTRY) {
         if (data.type === 'update') {
           console.log('Entry updated');
+          io.emit('reload');
         }
       }
     });
