@@ -5,15 +5,53 @@ import * as http from 'http';
 import * as mimeTypes from 'mime-types';
 import { Module } from '@nuxt/types';
 import {
-  BCMSMostCacheContent,
-  BCMSMostCacheContentItem,
   BCMSMostConfig,
 } from '@becomes/cms-most/types';
 import { SocketEventName } from '@becomes/cms-client';
 import { BCMSMost, BCMSMostPrototype } from '@becomes/cms-most';
 import * as SocketIO from 'socket.io';
+import {
+  BCMSNuxtPluginQueryFunction,
+  BCMSNuxtQueryFilterFunction, BCMSNuxtQuerySlice,
+  BCMSNuxtQuerySortFunction,
+} from './types';
 
 let bcmsMost: BCMSMostPrototype;
+
+function fixFunctionString(input: string): string {
+  if (input.startsWith('function sort')) {
+    return input
+      .replace(
+        'function sort',
+        '',
+      )
+      .replace(
+        ' {',
+        ' => {',
+      );
+  } else if (input.startsWith('function query')) {
+    return input
+      .replace(
+        'function query',
+        '',
+      )
+      .replace(
+        ' {',
+        ' => {',
+      );
+  } else if (input.startsWith('function filter')) {
+    return input
+      .replace(
+        'function filter',
+        '',
+      )
+      .replace(
+        ' {',
+        ' => {',
+      );
+  }
+  return input;
+}
 
 const contentServer = http.createServer(async (req, res) => {
   let rawBody = '';
@@ -48,6 +86,12 @@ const contentServer = http.createServer(async (req, res) => {
         let body: {
           type: 'find' | 'findOne';
           key: string;
+          variables: {
+            [key: string]: any
+          };
+          filter?: string;
+          sort?: string;
+          slice?: BCMSNuxtQuerySlice;
           query: string;
         };
         try {
@@ -61,11 +105,14 @@ const contentServer = http.createServer(async (req, res) => {
             res.writeHead(400);
             res.write(JSON.stringify({ message: 'Missing query' }));
           } else {
-            // console.log('query', body.query);
-            const query: (
-              item: BCMSMostCacheContentItem,
-              content: BCMSMostCacheContent,
-            ) => Promise<any> = eval(body.query);
+            let filterFunction: BCMSNuxtQueryFilterFunction<any>;
+            let sortFunction: BCMSNuxtQuerySortFunction<any>;
+            if (body.filter) {
+              filterFunction = eval(fixFunctionString(body.filter));
+            }
+            if (body.sort) {
+              sortFunction = eval(fixFunctionString(body.sort));
+            }
             const content = JSON.parse(
               JSON.stringify(await bcmsMost.cache.get.content()),
             );
@@ -76,10 +123,12 @@ const contentServer = http.createServer(async (req, res) => {
                 }),
               );
             } else {
-              const output: unknown[] = [];
+              let output: unknown[] = [];
+              const query: BCMSNuxtPluginQueryFunction<any> = eval(fixFunctionString(body.query));
               for (let i = 0; i < content[body.key].length; i++) {
                 try {
                   const result = await query(
+                    body.variables,
                     content[body.key][i],
                     content,
                   );
@@ -100,6 +149,24 @@ const contentServer = http.createServer(async (req, res) => {
               if (body.type === 'findOne') {
                 res.write(JSON.stringify(output[0]));
               } else {
+                if (filterFunction) {
+                  output = output.filter((e, i) => filterFunction(
+                    e,
+                    i,
+                  ));
+                }
+                if (sortFunction) {
+                  output.sort((a, b) => sortFunction(
+                    a,
+                    b,
+                  ));
+                }
+                if (body.slice) {
+                  output = output.slice(
+                    body.slice.start,
+                    body.slice.end,
+                  );
+                }
                 res.write(JSON.stringify(output));
               }
             }
