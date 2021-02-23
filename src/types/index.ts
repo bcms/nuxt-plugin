@@ -3,8 +3,9 @@ import '@nuxt/types';
 import 'vuex/types/index';
 
 export * from './plugin';
+export * from './server';
 
-import { BCMSNuxtPlugin } from './plugin';
+import type { BCMSNuxtPlugin } from './plugin';
 
 declare module '@nuxt/types' {
   interface NuxtAppOptions {

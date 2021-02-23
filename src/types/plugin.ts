@@ -1,10 +1,10 @@
 export type BCMSNuxtPluginQueryFunction<T> = (
   variables: {
-    [key: string]: any,
+    [key: string]: unknown;
   },
-  item: any,
-  cache: any,
-) => Promise<T>
+  item: unknown,
+  cache: unknown,
+) => Promise<T>;
 export type BCMSNuxtQueryFilterFunction<T> = (
   item: T,
   index: number,
@@ -12,13 +12,13 @@ export type BCMSNuxtQueryFilterFunction<T> = (
 export type BCMSNuxtQuerySortFunction<T> = (a: T, b: T) => number;
 
 export interface BCMSNuxtQuerySlice {
-  start: number,
-  end?: number,
+  start: number;
+  end?: number;
 }
 
 export interface BCMSNuxtQueryConfig<T, K> {
   variables?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   filter?: BCMSNuxtQueryFilterFunction<T>;
   sort?: BCMSNuxtQuerySortFunction<T>;
@@ -27,13 +27,7 @@ export interface BCMSNuxtQueryConfig<T, K> {
 }
 
 export interface BCMSNuxtPlugin {
-  findOne<T>(
-    template: string,
-    config: BCMSNuxtQueryConfig<T, T>,
-  ): Promise<T>;
-
-  find<T>(
-    template: string,
-    config: BCMSNuxtQueryConfig<T, T[]>,
-  ): Promise<T[]>;
+  findOne<T>(template: string, config: BCMSNuxtQueryConfig<T, T>): Promise<T>;
+  find<T>(template: string, config: BCMSNuxtQueryConfig<T, T[]>): Promise<T[]>;
+  functionData<T>(name: string): Promise<T>;
 }
