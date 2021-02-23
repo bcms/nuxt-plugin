@@ -1,6 +1,6 @@
 {
   "name": "nuxt-plugin-bcms",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Nuxt plugin for BCMS",
   "main": "./module.js",
   "types": "./types/index.d.ts",
@@ -38,7 +38,7 @@
   },
   "peerDependencies": {
     "nuxt": "^2.14.12",
-    "@becomes/cms-most": "^1.0.16"
+    "@becomes/cms-most": "^1.0.20"
   },
   "dependencies": {
     "@becomes/cms-client": "^2.0.4",
