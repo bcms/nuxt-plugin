@@ -10,9 +10,15 @@ import {
   BCMSNuxtCreateSocketServer,
 } from './server/main';
 
-let bcmsMost: BCMSMostPrototype;
-let contentServer: HTTPServer;
-let io: IOServer;
+const container: {
+  bcmsMost: BCMSMostPrototype;
+  contentServer: HTTPServer;
+  io: IOServer;
+} = {
+  bcmsMost: undefined,
+  contentServer: undefined,
+  io: undefined,
+};
 
 const nuxtModule: Module<BCMSMostConfig> = async function (moduleOptions) {
   const config: BCMSMostConfig = {
@@ -45,16 +51,16 @@ const nuxtModule: Module<BCMSMostConfig> = async function (moduleOptions) {
           ],
         },
   };
-  if (!bcmsMost) {
-    bcmsMost = BCMSMost(config);
-    contentServer = BCMSNuxtCreateServer(bcmsMost);
-    io = BCMSNuxtCreateSocketServer(contentServer);
+  if (!container.bcmsMost) {
+    container.bcmsMost = BCMSMost(config);
+    container.contentServer = BCMSNuxtCreateServer(container.bcmsMost);
+    container.io = BCMSNuxtCreateSocketServer(container.contentServer);
     try {
-      await bcmsMost.pipe.initialize(3001, async (name, data) => {
+      await container.bcmsMost.pipe.initialize(3001, async (name, data) => {
         if (name === SocketEventName.ENTRY) {
           if (data.type === 'update') {
             console.log('Entry updated');
-            io.emit('reload');
+            container.io.emit('reload');
           }
         }
       });
@@ -62,23 +68,40 @@ const nuxtModule: Module<BCMSMostConfig> = async function (moduleOptions) {
       console.error(err);
       process.exit(1);
     }
-    contentServer.listen(3002);
+    container.contentServer.listen(3002);
   }
   this.addPlugin({
     src: path.resolve(__dirname, 'plugin.js'),
     fileName: 'bcms.js',
   });
-
-  this.nuxt.hook['generate:done'] = async () => {
+  async function done() {
     try {
-      contentServer.close();
-      io.close();
-      await bcmsMost.pipe.postBuild('dist');
+      container.contentServer.close((err) => {
+        if (err) {
+          console.error('IO', err);
+          return;
+        }
+        console.log('Content server closed.');
+      });
+      await container.bcmsMost.pipe.postBuild('dist', 'dist/media', 3001);
+      container.bcmsMost.close();
+      delete container.bcmsMost;
+      delete container.contentServer;
+      delete container.io;
     } catch (error) {
       console.error(error);
       process.exit(1);
     }
-  };
+  }
+  if (typeof this.nuxt.hook === 'function') {
+    this.nuxt.hook('generate:done', async (generator) => {
+      await done();
+    });
+  } else {
+    this.nuxt.hook['generate:done'] = async () => {
+      await done();
+    };
+  }
 };
 
 export default nuxtModule;
