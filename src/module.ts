@@ -107,4 +107,5 @@ const nuxtModule: Module<BCMSMostConfig> = async function (moduleOptions) {
 export default nuxtModule;
 
 // REQUIRED if publishing the module as npm package
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const meta = require('./package.json');

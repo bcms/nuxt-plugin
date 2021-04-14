@@ -72,7 +72,7 @@ export const ContentHandler: BCMSNuxtRouteHandler<Body> = async (
             return;
           }
         }
-        if (body.type === 'findOne') {
+        if (body.type === 'findOne' && output[0]) {
           res.write(JSON.stringify(output[0]));
         } else {
           if (filterFunction) {

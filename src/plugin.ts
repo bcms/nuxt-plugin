@@ -109,7 +109,7 @@ const bcmsNuxtPluginInitializer = (
               rawBody += chunk;
             });
             res.on('end', () => {
-              const body = JSON.parse(rawBody);
+              const body = rawBody ? JSON.parse(rawBody) : undefined;
               if (res.statusCode !== 200) {
                 reject(Error(body.message));
               } else {
