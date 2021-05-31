@@ -1,14 +1,14 @@
 import * as http from 'http';
 import { Context } from '@nuxt/types';
 import { BCMSNuxtPlugin, BCMSNuxtQueryConfig } from './types';
-import SocketIO from 'socket.io-client';
+import {io as IO} from 'socket.io-client';
 
 const bcmsNuxtPluginInitializer = (
   context: Context,
   inject: (name: string, plugin: unknown) => void,
 ) => {
   if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-    const io = SocketIO('ws://localhost:3002', {
+    const io = IO('ws://localhost:3002', {
       path: '/bcms/content/socket/',
     });
     io.on('reload', () => {
