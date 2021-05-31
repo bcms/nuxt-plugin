@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { Context } from '@nuxt/types';
 import { BCMSNuxtPlugin, BCMSNuxtQueryConfig } from './types';
-import * as SocketIO from 'socket.io-client';
+import SocketIO from 'socket.io-client';
 
 const bcmsNuxtPluginInitializer = (
   context: Context,
