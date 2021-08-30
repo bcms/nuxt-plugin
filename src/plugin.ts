@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { Context } from '@nuxt/types';
 import { BCMSNuxtPlugin, BCMSNuxtQueryConfig } from './types';
-import {io as IO} from 'socket.io-client';
+import { io as IO } from 'socket.io-client';
 
 const bcmsNuxtPluginInitializer = (
   context: Context,
@@ -22,12 +22,12 @@ const bcmsNuxtPluginInitializer = (
     }
     return input;
   }
-  async function send<T, K>(
+  async function send<QueryResult>(
     type: 'find' | 'findOne',
     key: string,
-    config: BCMSNuxtQueryConfig<T, K>,
-  ): Promise<K> {
-    return await new Promise<K>((resolve, reject) => {
+    config: BCMSNuxtQueryConfig<QueryResult>,
+  ): Promise<QueryResult> {
+    return await new Promise<QueryResult>((resolve, reject) => {
       const queryString = fixFunctionString(config.query.toString());
       const filterString = config.filter
         ? fixFunctionString(config.filter.toString())
@@ -81,13 +81,19 @@ const bcmsNuxtPluginInitializer = (
   }
 
   const bcmsNuxtPlugin: BCMSNuxtPlugin = {
-    async findOne(template, config) {
+    async findOne<QueryResult>(
+      template: string,
+      config: BCMSNuxtQueryConfig<QueryResult>,
+    ) {
       return await send('findOne', template, config);
     },
-    async find(template, config) {
+    async find<QueryResult>(
+      template: string,
+      config: BCMSNuxtQueryConfig<QueryResult[]>,
+    ) {
       return await send('find', template, config);
     },
-    async functionData<T>(name) {
+    async functionData<T>(name: string) {
       return await new Promise<T>((resolve, reject) => {
         const data = JSON.stringify({
           name,

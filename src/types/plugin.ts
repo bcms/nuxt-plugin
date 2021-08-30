@@ -1,8 +1,10 @@
+import { BCMSEntry } from './entry';
+
 export type BCMSNuxtPluginQueryFunction<T> = (
   variables: {
     [key: string]: unknown;
   },
-  item: unknown,
+  item: BCMSEntry,
   cache: unknown,
 ) => Promise<T>;
 export type BCMSNuxtQueryFilterFunction<T> = (
@@ -16,18 +18,24 @@ export interface BCMSNuxtQuerySlice {
   end?: number;
 }
 
-export interface BCMSNuxtQueryConfig<T, K> {
+export interface BCMSNuxtQueryConfig<QueryResult> {
   variables?: {
     [key: string]: unknown;
   };
-  filter?: BCMSNuxtQueryFilterFunction<T>;
-  sort?: BCMSNuxtQuerySortFunction<T>;
+  filter?: BCMSNuxtQueryFilterFunction<BCMSEntry>;
+  sort?: BCMSNuxtQuerySortFunction<BCMSEntry>;
   slice?: BCMSNuxtQuerySlice;
-  query: BCMSNuxtPluginQueryFunction<K>;
+  query: BCMSNuxtPluginQueryFunction<QueryResult>;
 }
 
 export interface BCMSNuxtPlugin {
-  findOne<T>(template: string, config: BCMSNuxtQueryConfig<T, T>): Promise<T>;
-  find<T>(template: string, config: BCMSNuxtQueryConfig<T, T[]>): Promise<T[]>;
+  findOne<QueryResult>(
+    template: string,
+    config: BCMSNuxtQueryConfig<QueryResult>,
+  ): Promise<QueryResult>;
+  find<QueryResult>(
+    template: string,
+    config: BCMSNuxtQueryConfig<QueryResult[]>,
+  ): Promise<QueryResult[]>;
   functionData<T>(name: string): Promise<T>;
 }
