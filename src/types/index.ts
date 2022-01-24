@@ -3,6 +3,7 @@ import '@nuxt/types';
 import 'vuex/types/index';
 
 export * from './plugin';
+export * from './server-middleware';
 
 import type { BCMSNuxtPlugin } from './plugin';
 

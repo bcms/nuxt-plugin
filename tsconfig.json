@@ -13,7 +13,11 @@
     "rootDir": "src",
     "importsNotUsedAsValues": "error",
     "noUnusedLocals": true,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "paths": {
+      "nuxt-plugin-bcms": ["./src"],
+      "nuxt-plugin-bcms/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/node_modules"]

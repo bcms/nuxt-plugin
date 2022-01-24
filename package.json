@@ -1,13 +1,14 @@
 {
   "name": "nuxt-plugin-bcms",
-  "version": "1.0.8",
+  "version": "2.0.0-alpha1",
   "description": "Nuxt plugin for BCMS",
   "main": "./module.js",
   "types": "./types/index.d.ts",
   "scripts": {
-    "build": "tsc -p .",
+    "build:ts": "tsc -p .",
     "build:watch": "tsc -w",
-    "bundle": "node tools.js --bundle"
+    "bundle": "npm-tool --bundle",
+    "pack": "npm-tool --pack"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,7 @@
   "homepage": "https://github.com/becomesco/nuxt-plugin-bcms#readme",
   "devDependencies": {
     "@banez/npm-tool": "^1.0.1",
-    "@becomes/cms-client": "^3.0.0-alpha1",
+    "@becomes/cms-client": "^3.0.0-alpha2",
     "@becomes/cms-most": "^2.0.0-alpha1",
     "@nuxt/types": "^2.15.6",
     "@types/node": "^14.17.1",
@@ -34,8 +35,11 @@
     "typescript": "^4.4.4"
   },
   "peerDependencies": {
-    "@becomes/cms-client": "^3.0.0-alpha1",
+    "@becomes/cms-client": "^3.0.0-alpha2",
     "@becomes/cms-most": "^2.0.0-alpha1",
     "nuxt": "^2.15.2"
+  },
+  "dependencies": {
+    "axios": "^0.25.0"
   }
 }
