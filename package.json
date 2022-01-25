@@ -23,7 +23,7 @@
   "devDependencies": {
     "@banez/npm-tool": "^1.0.1",
     "@becomes/cms-client": "^3.0.0-alpha2",
-    "@becomes/cms-most": "^2.0.0-alpha1",
+    "@becomes/cms-most": "file:most.tgz",
     "@nuxt/types": "^2.15.6",
     "@types/node": "^14.17.1",
     "@typescript-eslint/eslint-plugin": "^4.25.0",

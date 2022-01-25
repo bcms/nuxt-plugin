@@ -2,10 +2,16 @@ import type { BCMSClient, BCMSEntryParsed } from '@becomes/cms-client/types';
 import type {
   BCMSMostCacheContent,
   BCMSMostConfig,
+  BCMSMostServerRoutes,
 } from '@becomes/cms-most/types';
 
 export interface BCMSNuxtPluginConfig extends BCMSMostConfig {
   websiteDomain: string;
+  server?: {
+    port?: number;
+    domain?: string;
+    routes?: BCMSMostServerRoutes;
+  };
 }
 
 export type BCMSNuxtPluginQueryFunction<QueryResult> = (
@@ -14,7 +20,6 @@ export type BCMSNuxtPluginQueryFunction<QueryResult> = (
 ) => Promise<QueryResult>;
 
 export interface BCMSNuxtPlugin extends BCMSClient {
-  advanced: {
     request<Result>(config: {
       url: string;
       method?: 'get' | 'post' | 'put' | 'delete';
@@ -27,7 +32,6 @@ export interface BCMSNuxtPlugin extends BCMSClient {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data?: any;
     }): Promise<Result>;
-  }
   // entry: {
   //   findOne<QueryResult>(
   //     template: string,

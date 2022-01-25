@@ -39,6 +39,14 @@ const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
     fileName: 'bcms.js',
     options: moduleOptions,
   });
+  this.addServerMiddleware({
+    path: '/bcms/api',
+    handler: path.join(__dirname, 'middleware', 'content.js'),
+  });
+  this.addServerMiddleware({
+    path: `/${bcmsMost.media.output.slice(1).join('/')}`,
+    handler: path.join(__dirname, 'middleware', 'image.js'),
+  });
   async function done() {
     try {
       // TODO: Implement post generate
@@ -47,13 +55,27 @@ const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
       process.exit(1);
     }
   }
+  async function setupServer() {
+    await bcmsMost.server.stop();
+    await bcmsMost.server.start(
+      moduleOptions.server && moduleOptions.server.routes
+        ? moduleOptions.server.routes
+        : {},
+    );
+  }
   if (typeof this.nuxt.hook === 'function') {
     this.nuxt.hook('generate:done', async () => {
       await done();
     });
+    this.nuxt.hook('ready', async () => {
+      await setupServer();
+    });
   } else {
     this.nuxt.hook['generate:done'] = async () => {
       await done();
+    };
+    this.nuxt.hook['ready'] = async () => {
+      await setupServer();
     };
   }
 };

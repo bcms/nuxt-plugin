@@ -12,7 +12,7 @@ const bcmsNuxtPluginInitializer = (
     cmsOrigin: options.cms.origin,
     key: options.cms.key,
   });
-  const bcmsNuxtPlugin = createBcmsNuxtPlugin(client);
+  const bcmsNuxtPlugin = createBcmsNuxtPlugin(client, options);
   ctx.$bcms = bcmsNuxtPlugin;
   inject('bcms', bcmsNuxtPlugin);
 };
