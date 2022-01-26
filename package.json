@@ -9,6 +9,7 @@
     "build:watch": "tsc -w",
     "bundle": "npm-tool --bundle",
     "pack": "npm-tool --pack",
+    "publish": "npm-tool --publish",
     "build:components": "vue-cli-service build --target lib --name components-library ./components/index.ts --dest dist/components"
   },
   "repository": {
