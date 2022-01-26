@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import type { ServerMiddleware } from '@nuxt/types';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 
+
+
 export function createBcmsNuxtImageMiddleware(): ServerMiddleware {
   return async (req, res) => {
     try {
