@@ -40,7 +40,7 @@ const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
     options: moduleOptions,
   });
   this.addServerMiddleware({
-    path: '/bcms/api',
+    path: '/api/bcms',
     handler: path.join(__dirname, 'middleware', 'content.js'),
   });
   this.addServerMiddleware({

@@ -17,7 +17,7 @@ export function createBcmsNuxtContentMiddleware(): ServerMiddleware {
     });
     try {
       const result = await axios({
-        url: `http://localhost:3001/bcms/api${req.url}`,
+        url: `http://localhost:3001/api/bcms${req.url}`,
         method: (req.method as Method) || 'GET',
         headers: req.headers as { [name: string]: string },
         data: rawBody,

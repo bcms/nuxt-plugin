@@ -2,8 +2,6 @@ import * as fs from 'fs';
 import type { ServerMiddleware } from '@nuxt/types';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 
-
-
 export function createBcmsNuxtImageMiddleware(): ServerMiddleware {
   return async (req, res) => {
     try {
@@ -14,7 +12,7 @@ export function createBcmsNuxtImageMiddleware(): ServerMiddleware {
         fileName: string;
         fileSize: number;
       }> = await axios({
-        url: `http://localhost:3001/bcms/image${req.url}`,
+        url: `http://localhost:3001/api/bcms-images${req.url}`,
         method: (req.method as Method) || 'GET',
         headers: req.headers as { [name: string]: string },
       });
@@ -23,7 +21,9 @@ export function createBcmsNuxtImageMiddleware(): ServerMiddleware {
         res.setHeader('Content-Type', result.data.mimetype);
         res.setHeader('Content-Length', result.data.fileSize);
         const readStream = fs.createReadStream(result.data.path);
-        readStream.pipe(res);
+        readStream.pipe(res, {
+          end: true,
+        });
       } else {
         res.statusCode = 404;
         res.end();

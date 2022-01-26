@@ -12,7 +12,7 @@
       </picture>
     </template>
     <template v-else>
-      <img :src="media.src" :alt="media.alt_text" />
+      <img :src="s1" :alt="media.alt_text" />
     </template>
   </div>
 </template>
@@ -25,6 +25,7 @@ import type {
   BCMSMostImageProcessorProcessOptions,
 } from '@becomes/cms-most/types';
 import type { BCMSMediaParsed } from '@becomes/cms-client/types';
+import {output} from '@becomes/cms-most/frontend/_output-path';
 
 export default Vue.extend<
   {
@@ -35,7 +36,6 @@ export default Vue.extend<
   unknown,
   unknown,
   {
-    basePath?: string;
     media: BCMSMediaParsed;
     options?: BCMSMostImageProcessorProcessOptions;
   }
@@ -46,9 +46,9 @@ export default Vue.extend<
   },
   data() {
     const image = createBcmsImageHandler(
-      this.basePath || '/bcms-media',
       this.media,
       this.options,
+      output,
     );
     const ss = image.getSrcSet();
     return {
