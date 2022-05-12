@@ -20,18 +20,18 @@ export type BCMSNuxtPluginQueryFunction<QueryResult> = (
 ) => Promise<QueryResult>;
 
 export interface BCMSNuxtPlugin extends BCMSClient {
-    request<Result>(config: {
-      url: string;
-      method?: 'get' | 'post' | 'put' | 'delete';
-      headers?: {
-        [name: string]: string;
-      };
-      query?: {
-        [name: string]: string;
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data?: any;
-    }): Promise<Result>;
+  request<Result>(config: {
+    url: string;
+    method?: 'get' | 'post' | 'put' | 'delete';
+    headers?: {
+      [name: string]: string;
+    };
+    query?: {
+      [name: string]: string;
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data?: any;
+  }): Promise<Result>;
   // entry: {
   //   findOne<QueryResult>(
   //     template: string,

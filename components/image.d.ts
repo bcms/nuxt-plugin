@@ -7,11 +7,17 @@ declare module 'nuxt-plugin-bcms/components/image.vue' {
   import type { ExtendedVue, Vue } from 'vue/types/vue';
   type BCMSImage = ExtendedVue<
     Vue,
-    { image: BCMSImageHandler; s1: string; s2: string },
+    {
+      srcSet: [string, string, number, number, number];
+      handler: BCMSImageHandler;
+      resizeHandler: () => void;
+      mediaId: string;
+      BCMSImageConfig: BCMSImageConfigType;
+      output: string;
+    },
     unknown,
     unknown,
     {
-      basePath?: string;
       media: BCMSMediaParsed;
       options?: BCMSMostImageProcessorProcessOptions;
     }

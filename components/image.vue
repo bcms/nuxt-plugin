@@ -1,72 +1,104 @@
 <template>
-  <div class="container" ref="test">
-    <template v-if="image.parsable">
+  <div
+    ref="container"
+    class="bcmsImage"
+    :data-bcms-img-w="srcSet[2]"
+    :data-bcms-img-h="srcSet[3]"
+    :data-bcms-img-src="media.src"
+    :data-bcms-img-ops="handler.optionString"
+    :data-bcms-img-idx="srcSet[4]"
+  >
+    <div v-if="BCMSImageConfig.localImageProcessing">
+      <div v-if="handler.parsable">
+        <picture>
+          <source :srcset="srcSet[0]" />
+          <source :srcset="srcSet[1]" />
+          <img
+            :data-bcms-image="handler.optionString + ';' + media.src"
+            :src="output + media.src"
+            :alt="media.alt_text"
+            :width="srcSet[2]"
+            :height="srcSet[3]"
+          />
+        </picture>
+      </div>
+      <div v-else>
+        <img :src="s1" :alt="media.alt_text" />
+      </div>
+    </div>
+    <div v-else>
       <picture>
-        <source :srcset="s1" />
-        <source :srcset="s2" />
+        <source
+          :srcset="`${BCMSImageConfig.cmsOrigin}/api/media/${media._id}/bin/${BCMSImageConfig.publicApiKeyId}?ops=${handler.optionString}&idx=${srcSet[4]}&webp=true`"
+        />
+        <source
+          :srcSet="`${BCMSImageConfig.cmsOrigin}/api/media/${media._id}/bin/${BCMSImageConfig.publicApiKeyId}?ops=${handler.optionString}&idx=${srcSet[4]}`"
+        />
         <img
-          :data-bcms-image="image.optionString + ';' + media.src"
-          :src="media.src"
+          :data-bcms-image="handler.optionString + ';' + media.src"
+          :src="`${BCMSImageConfig.cmsOrigin}/api/media/${media._id}/bin/${BCMSImageConfig.publicApiKeyId}?ops=${handler.optionString}&idx=${srcSet[4]}`"
           :alt="media.alt_text"
+          :width="srcSet[2]"
+          :height="srcSet[3]"
         />
       </picture>
-    </template>
-    <template v-else>
-      <img :src="s1" :alt="media.alt_text" />
-    </template>
+    </div>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue';
 import { createBcmsImageHandler } from '@becomes/cms-most/frontend';
-import type {
-  BCMSImageHandler,
-  BCMSMostImageProcessorProcessOptions,
-} from '@becomes/cms-most/types';
-import type { BCMSMediaParsed } from '@becomes/cms-client/types';
-import {output} from '@becomes/cms-most/frontend/_output-path';
+import { output } from '@becomes/cms-most/frontend/_output-path';
+import { BCMSImageConfig } from './_config';
 
-export default Vue.extend<
-  {
-    image: BCMSImageHandler;
-    s1: string;
-    s2: string;
-  },
-  unknown,
-  unknown,
-  {
-    media: BCMSMediaParsed;
-    options?: BCMSMostImageProcessorProcessOptions;
-  }
->({
+function createResizeHandler(el, handler, self) {
+  return () => {
+    self.srcSet = handler.getSrcSet({ width: el.offsetWidth });
+  };
+}
+
+export default Vue.extend({
   props: {
     media: {},
     options: {},
   },
   data() {
-    const image = createBcmsImageHandler(
-      this.media,
-      this.options,
-      output,
-    );
-    const ss = image.getSrcSet();
+    const handler = createBcmsImageHandler(this.media, this.options, output);
     return {
-      image,
-      s1: ss[0],
-      s2: ss[1],
+      handler,
+      srcSet: handler.getSrcSet(),
+      resizeHandler: () => {},
+      mediaId: this.media._id,
+      BCMSImageConfig,
+      output,
     };
   },
   mounted() {
-    const el = this.$refs.test as HTMLDivElement;
+    const el = this.$refs.container;
     if (!el) {
       return;
     }
-    const ss = this.image.getSrcSet({
-      width: el.offsetWidth,
-    });
-    this.s1 = ss[0];
-    this.s2 = ss[1];
+    this.resizeHandler = createResizeHandler(el, this.handler, this);
+    window.addEventListener('resize', this.resizeHandler);
+    this.resizeHandler();
+  },
+  updated() {
+    if (this.mediaId !== this.media._id) {
+      this.mediaId = this.media._id;
+      window.removeEventListener('resize', this.resizeHandler);
+      this.handler = createBcmsImageHandler(this.media, this.options, output);
+      const el = this.$refs.container;
+      if (!el) {
+        return;
+      }
+      this.resizeHandler = createResizeHandler(el, this.handler, this);
+      window.addEventListener('resize', this.resizeHandler);
+      this.resizeHandler();
+    }
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.resizeHandler);
   },
 });
 </script>
