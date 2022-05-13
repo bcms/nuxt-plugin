@@ -42,8 +42,11 @@ export function createBcmsNuxtPlugin(
           }
           queryString = '?' + queries.join('&');
         }
+        const basePath = `${schema}://${domain}:${port}`;
         const res = await axios({
-          url: `${schema}://${domain}:${port}/api/bcms${config.url}${queryString}`,
+          url: `${typeof window === 'undefined' ? basePath : ''}/api/bcms${
+            config.url
+          }${queryString}`,
           method: config.method,
           headers: config.headers,
           data: config.data,
