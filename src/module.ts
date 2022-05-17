@@ -49,7 +49,10 @@ const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
   });
   async function done() {
     try {
-      // TODO: Implement post generate
+      await bcmsMost.imageProcessor.postBuild({
+        buildOutput: ['dist'],
+      });
+      await bcmsMost.server.stop();
     } catch (error) {
       console.error(error);
       process.exit(1);
