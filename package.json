@@ -27,7 +27,7 @@
     "@banez/fs": "^1.0.2",
     "@banez/npm-tool": "^1.0.1",
     "@becomes/cms-client": "^3.1.2",
-    "@becomes/cms-most": "^2.2.4",
+    "@becomes/cms-most": "^2.3.0",
     "@nuxt/types": "^2.15.6",
     "@types/node": "^14.17.1",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
@@ -41,7 +41,7 @@
   },
   "peerDependencies": {
     "@becomes/cms-client": ">=3.1.2",
-    "@becomes/cms-most": ">=2.2.4",
+    "@becomes/cms-most": ">=2.3.0",
     "nuxt": "^2.15.2"
   },
   "dependencies": {
