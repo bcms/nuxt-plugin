@@ -2,6 +2,11 @@
 
 This is a NuxtJS plugin for the BCMS.
 
+[![NPM Version][npm-image]][npm-url]
+
+[npm-image]: https://img.shields.io/npm/v/nuxt-plugin-bcms.svg
+[npm-url]: https://npmjs.org/package/nuxt-plugin-bcms
+
 ## Getting started
 
 Best way would be to create a new project using [BCMS CLI](https://github.com/becomesco/cms-cli) by running `bcms --website create`, but if you want to add the plugin to an existing project, you will need to follow next steps.
