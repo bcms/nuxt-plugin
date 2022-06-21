@@ -4,16 +4,18 @@ import type {
   BCMSMostImageProcessorProcessOptions,
 } from '@becomes/cms-most/types';
 import * as vue from 'vue';
-import { BCMSImageConfig } from './_config';
+import { BCMSImageConfig } from '@becomes/cms-most/frontend';
 import { createBcmsImageHandler } from '@becomes/cms-most/frontend/image';
 import { output } from '@becomes/cms-most/frontend/_output-path';
 
 type VueType = typeof vue.default;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Vue = vue as any as VueType;
 
 function createResizeHandler(
   el: HTMLElement,
   handler: BCMSImageHandler,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   self: any,
 ) {
   return () => {
@@ -35,6 +37,7 @@ export default Vue.extend<
   {
     media: BCMSMediaParsed;
     options?: BCMSMostImageProcessorProcessOptions;
+    svg?: boolean;
   }
 >({
   template: `
@@ -47,7 +50,6 @@ export default Vue.extend<
     :data-bcms-img-ops="handler.optionString"
     :data-bcms-img-idx="srcSet[4]"
   >
-    <div v-if="BCMSImageConfig.localImageProcessing">
       <div v-if="handler.parsable">
         <picture>
           <source :srcset="srcSet[0]" />
@@ -61,10 +63,15 @@ export default Vue.extend<
           />
         </picture>
       </div>
+      <div v-else-if="svg && media.svg" v-html="media.svg" />
       <div v-else>
-        <img :src="s1" :alt="media.alt_text" />
+      <img
+        :src="srcSet[1]"
+        :alt="media.alt_text"
+        :width="media.width"
+        :height="media.height"
+      />
       </div>
-    </div>
     <div v-else>
       <picture>
         <source
@@ -85,8 +92,18 @@ export default Vue.extend<
   </div>
   `,
   props: {
-    media: {},
-    options: {},
+    media: {
+      type: Object as vue.PropType<BCMSMediaParsed>,
+      default: undefined,
+    },
+    options: {
+      type: Object as vue.PropType<BCMSMostImageProcessorProcessOptions>,
+      default: undefined,
+    },
+    svg: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     const handler = createBcmsImageHandler(this.media, this.options, output);
