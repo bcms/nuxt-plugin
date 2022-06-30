@@ -56,7 +56,7 @@ export default Vue.extend<
           <source :srcset="srcSet[1]" />
           <img
             :data-bcms-image="handler.optionString + ';' + media.src"
-            :src="output + media.src"
+            :src="BCMSImageConfig.localeImageProcessing ? output + media.src : srcSet[1]"
             :alt="media.alt_text"
             :width="srcSet[2]"
             :height="srcSet[3]"
@@ -65,30 +65,13 @@ export default Vue.extend<
       </div>
       <div v-else-if="svg && media.svg" v-html="media.svg" />
       <div v-else>
-      <img
-        :src="srcSet[1]"
-        :alt="media.alt_text"
-        :width="media.width"
-        :height="media.height"
-      />
-      </div>
-    <div v-else>
-      <picture>
-        <source
-          :srcset="\`\${BCMSImageConfig.cmsOrigin}/api/media/\${media._id}/bin/\${BCMSImageConfig.publicApiKeyId}?ops=\${handler.optionString}&idx=\${srcSet[4]}&webp=true\`"
-        />
-        <source
-          :srcSet="\`\${BCMSImageConfig.cmsOrigin}/api/media/\${media._id}/bin/\${BCMSImageConfig.publicApiKeyId}?ops=\${handler.optionString}&idx=\${srcSet[4]}\`"
-        />
         <img
-          :data-bcms-image="handler.optionString + ';' + media.src"
-          :src="\`\${BCMSImageConfig.cmsOrigin}/api/media/\${media._id}/bin/\${BCMSImageConfig.publicApiKeyId}?ops=\${handler.optionString}&idx=\${srcSet[4]}\`"
+          :src="srcSet[1]"
           :alt="media.alt_text"
-          :width="srcSet[2]"
-          :height="srcSet[3]"
+          :width="media.width"
+          :height="media.height"
         />
-      </picture>
-    </div>
+      </div>
   </div>
   `,
   props: {
