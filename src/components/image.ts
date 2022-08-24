@@ -10,7 +10,10 @@ import { output } from '@becomes/cms-most/frontend/_output-path';
 
 type VueType = typeof vue.default;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Vue = vue as any as VueType;
+const Vue = vue.default
+  ? (vue.default as any as VueType)
+  : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (vue as any as VueType);
 
 function createResizeHandler(
   el: HTMLElement,
