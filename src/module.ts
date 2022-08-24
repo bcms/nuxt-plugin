@@ -21,7 +21,7 @@ export function createBcmsNuxtConfig(
 const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
   moduleOptions,
 ) {
-  createBcmsNuxtConfig(moduleOptions);
+  const config = createBcmsNuxtConfig(moduleOptions);
   await writeFile(
     path.join(__dirname, '_config.js'),
     `module.exports = ${JSON.stringify(moduleOptions, null, '  ')}`,
@@ -49,9 +49,11 @@ const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
   });
   async function done() {
     try {
-      await bcmsMost.imageProcessor.postBuild({
-        buildOutput: ['dist'],
-      });
+      if (config.postProcessImages) {
+        await bcmsMost.imageProcessor.postBuild({
+          buildOutput: ['dist'],
+        });
+      }
       await bcmsMost.server.stop();
     } catch (error) {
       console.error(error);

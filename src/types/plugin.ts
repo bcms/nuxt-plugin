@@ -12,6 +12,7 @@ export interface BCMSNuxtPluginConfig extends BCMSMostConfig {
     domain?: string;
     routes?: BCMSMostServerRoutes;
   };
+  postProcessImages?: boolean;
 }
 
 export type BCMSNuxtPluginQueryFunction<QueryResult> = (
