@@ -24,15 +24,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import type { PropType } from 'vue';
-import {
+import type {
   BCMSEntryContentParsed,
   BCMSPropRichTextDataParsed,
 } from '@becomes/cms-client/types';
 import BCMSContentItem from './bcms-content-item.vue';
-
-interface BCMSWidgetComponents {
-  [name: string]: any;
-}
 
 export default Vue.extend({
   components: {

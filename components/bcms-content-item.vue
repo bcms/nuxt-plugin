@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="item.name && item.type === BCMSEntryContentNodeType.widget">
-      <component :is="item.name.replace(/_/g, '-')" />
+      <component :is="item.name.replace(/_/g, '-')" :data="item.value" />
     </div>
     <div v-else>
       <div
@@ -19,10 +19,6 @@ import {
   BCMSEntryContentNodeType,
   BCMSEntryContentParsedItem,
 } from '@becomes/cms-client/types';
-
-interface BCMSWidgetComponents {
-  [name: string]: any;
-}
 
 export default Vue.extend({
   name: 'BCMSContentItem',
