@@ -11,7 +11,7 @@ module.exports = createConfig({
       {
         title: 'Copy components',
         task: async () => {
-          await fs.copy('components', ['dist', 'components']);
+          await fs.copy('components', ['dist', '_components']);
         },
       },
     ],
