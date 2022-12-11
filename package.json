@@ -1,6 +1,6 @@
 {
   "name": "nuxt-plugin-bcms",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "description": "Nuxt plugin for BCMS",
   "main": "./module.js",
   "types": "./index.d.ts",
@@ -21,6 +21,7 @@
   "bugs": {
     "url": "https://github.com/becomesco/nuxt-plugin-bcms/issues"
   },
+  "keywords": ["nuxt", "vue", "plugin", "bcms"],
   "homepage": "https://github.com/becomesco/nuxt-plugin-bcms#readme",
   "devDependencies": {
     "@banez/child_process": "^1.0.3",
