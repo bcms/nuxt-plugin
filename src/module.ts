@@ -1,10 +1,15 @@
-import * as path from 'path';
-import type { Module } from '@nuxt/types';
 import type { BCMSMost } from '@becomes/cms-most/types';
-import { createBcmsMost } from '@becomes/cms-most';
+import {
+  addPlugin,
+  addServerHandler,
+  createResolver,
+  defineNuxtModule,
+} from '@nuxt/kit';
 import type { BCMSNuxtPluginConfig } from './types';
+import { createBcmsMost } from '@becomes/cms-most';
 import { createBcmsNuxtClient } from './client';
-import { writeFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { createFS } from '@banez/fs';
 
 let bcmsMost: BCMSMost;
 
@@ -18,75 +23,89 @@ export function createBcmsNuxtConfig(
   return config;
 }
 
-const nuxtModule: Module<BCMSNuxtPluginConfig> = async function (
-  moduleOptions,
-) {
-  const config = createBcmsNuxtConfig(moduleOptions);
-  await writeFile(
-    path.join(__dirname, '_config.js'),
-    `module.exports = ${JSON.stringify(moduleOptions, null, '  ')}`,
-  );
-  if (!bcmsMost) {
-    bcmsMost = createBcmsMost({ config: moduleOptions });
-    await bcmsMost.content.pull();
-    await bcmsMost.media.pull();
-    await bcmsMost.typeConverter.pull();
-    await bcmsMost.socketConnect();
-    createBcmsNuxtClient(bcmsMost.client);
-  }
-  this.addPlugin({
-    src: path.resolve(__dirname, 'plugin.js'),
-    fileName: 'bcms.js',
-    options: moduleOptions,
-  });
-  this.addServerMiddleware({
-    path: '/api/bcms',
-    handler: path.join(__dirname, 'middleware', 'content.js'),
-  });
-  this.addServerMiddleware({
-    path: `/${bcmsMost.media.output.slice(1).join('/')}`,
-    handler: path.join(__dirname, 'middleware', 'image.js'),
-  });
-  async function done() {
-    try {
-      if (config.postProcessImages) {
-        await bcmsMost.imageProcessor.postBuild({
-          buildOutput: ['dist'],
-        });
+export default defineNuxtModule<BCMSNuxtPluginConfig>({
+  meta: {
+    name: 'bcms',
+    configKey: 'bcms',
+  },
+  async setup(options, nuxt) {
+    const componentsVersion = 'v1';
+    const fs = createFS({
+      base: process.cwd(),
+    });
+    let saveComponents = false;
+    if (await fs.exist(['components', 'bcms', '__v'], true)) {
+      const v = await fs.readString(['components', 'bcms', '__v']);
+      if (v !== componentsVersion) {
+        saveComponents = true;
       }
-      await bcmsMost.server.stop();
-    } catch (error) {
-      console.error(error);
-      process.exit(1);
+    } else {
+      saveComponents = true;
     }
-  }
-  async function setupServer() {
-    await bcmsMost.server.stop();
-    await bcmsMost.server.start(
-      moduleOptions.server && moduleOptions.server.routes
-        ? moduleOptions.server.routes
-        : {},
-    );
-  }
-  if (typeof this.nuxt.hook === 'function') {
-    this.nuxt.hook('generate:done', async () => {
-      await done();
+    if (saveComponents) {
+      await fs.copy([__dirname, '_components'], ['components', 'bcms']);
+      await fs.save(['components', 'bcms', '__v'], componentsVersion);
+    }
+    const { resolve } = createResolver(import.meta.url);
+    const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url));
+    nuxt.options.build.transpile.push(runtimeDir);
+    const config = createBcmsNuxtConfig(options);
+    if (!config.media) {
+      config.media = {
+        output: 'public/bcms-media',
+      };
+    } else if (!config.media.output) {
+      config.media.output = 'public/bcms-media';
+    }
+    if (!bcmsMost) {
+      bcmsMost = createBcmsMost({ config });
+      await bcmsMost.content.pull();
+      await bcmsMost.media.pull();
+      await bcmsMost.typeConverter.pull();
+      await bcmsMost.socketConnect();
+      createBcmsNuxtClient(bcmsMost.client);
+    }
+    addPlugin(resolve(runtimeDir, 'plugin'));
+    addServerHandler({
+      route: '/api/bcms',
+      method: 'get',
+      middleware: true,
+      handler: resolve(runtimeDir, 'middleware', 'content'),
     });
-    this.nuxt.hook('ready', async () => {
+    addServerHandler({
+      route: `/${bcmsMost.media.output.slice(1).join('/')}`,
+      method: 'get',
+      middleware: true,
+      handler: resolve(runtimeDir, 'middleware', 'image'),
+    });
+
+    async function done() {
+      try {
+        if (config.postProcessImages) {
+          await bcmsMost.imageProcessor.postBuild({
+            buildOutput: ['dist'],
+          });
+        }
+        await bcmsMost.server.stop();
+      } catch (error) {
+        console.error(error);
+        process.exit(1);
+      }
+    }
+
+    async function setupServer() {
+      await bcmsMost.server.stop();
+      await bcmsMost.server.start(
+        config.server && config.server.routes ? config.server.routes : {},
+      );
+    }
+
+    nuxt.hook('ready', async () => {
       await setupServer();
     });
-  } else {
-    this.nuxt.hook['generate:done'] = async () => {
-      await done();
-    };
-    this.nuxt.hook['ready'] = async () => {
-      await setupServer();
-    };
-  }
-};
-
-export default nuxtModule;
-
-// REQUIRED if publishing the module as npm package
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const meta = require('./package.json');
+    nuxt.hook('generate:done' as any, async () => {
+      console.log('TEST');
+      done();
+    });
+  },
+});

@@ -3,7 +3,7 @@
   "version": "2.3.1",
   "description": "Nuxt plugin for BCMS",
   "main": "./module.js",
-  "types": "./types/index.d.ts",
+  "types": "./index.d.ts",
   "scripts": {
     "build:ts": "tsc -p .",
     "build:watch": "tsc -w",
@@ -24,26 +24,27 @@
   "homepage": "https://github.com/becomesco/nuxt-plugin-bcms#readme",
   "devDependencies": {
     "@banez/child_process": "^1.0.3",
-    "@banez/fs": "^1.0.2",
+    "@banez/fs": "^1.0.3",
     "@banez/npm-tool": "^1.0.1",
-    "@becomes/cms-cli": "^2.3.6",
+    "@becomes/cms-cli": "^2.3.8",
     "@becomes/cms-client": "^3.3.3",
-    "@becomes/cms-most": "^2.6.2",
-    "@nuxt/types": "^2.15.6",
+    "@becomes/cms-most": "^2.6.8",
+    "@nuxt/kit": "^3.0.0",
     "@types/node": "^14.17.1",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
     "eslint": "^7.27.0",
-    "nuxt": "^2.15.8",
+    "h3": "^1.0.1",
+    "nuxt": "^3.0.0",
     "prettier": "^2.3.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4",
-    "vue": "^2.6.14"
+    "vue": "^3.2.45"
   },
   "peerDependencies": {
     "@becomes/cms-client": ">=3.3.3",
-    "@becomes/cms-most": ">=2.6.2",
-    "nuxt": "^2.15.2"
+    "@becomes/cms-most": ">=2.6.8",
+    "nuxt": "^3.0.0"
   },
   "dependencies": {
     "axios": "^0.25.0"

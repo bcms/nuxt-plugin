@@ -20,6 +20,17 @@ export type BCMSNuxtPluginQueryFunction<QueryResult> = (
   cache: BCMSMostCacheContent,
 ) => Promise<QueryResult>;
 
+declare module '#app' {
+  interface NuxtApp {
+    $bcms: BCMSNuxtPlugin;
+  }
+}
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $bcms: BCMSNuxtPlugin;
+  }
+}
+
 export interface BCMSNuxtPlugin extends BCMSClient {
   request<Result>(config: {
     url: string;
@@ -33,20 +44,4 @@ export interface BCMSNuxtPlugin extends BCMSClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?: any;
   }): Promise<Result>;
-  // entry: {
-  //   findOne<QueryResult>(
-  //     template: string,
-  //     query: BCMSNuxtPluginQueryFunction<QueryResult>,
-  //   ): Promise<QueryResult | null>;
-  //   find<QueryResult>(
-  //     template: string,
-  //     query: BCMSNuxtPluginQueryFunction<QueryResult>,
-  //   ): Promise<QueryResult[]>;
-  // };
-  // function: {
-  //   /**
-  //    * Will return data for specified function call from the cache.
-  //    */
-  //   data<Data>(functionName: string): Promise<Data | null>;
-  // };
 }
