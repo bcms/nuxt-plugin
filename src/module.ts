@@ -34,8 +34,8 @@ export default defineNuxtModule<BCMSNuxtPluginConfig>({
       base: process.cwd(),
     });
     let saveComponents = false;
-    if (await fs.exist(['components', 'bcms', '__v'], true)) {
-      const v = await fs.readString(['components', 'bcms', '__v']);
+    if (await fs.exist(['bcms-components', '__v'], true)) {
+      const v = await fs.readString(['bcms-components', '__v']);
       if (v !== componentsVersion) {
         saveComponents = true;
       }
@@ -43,8 +43,8 @@ export default defineNuxtModule<BCMSNuxtPluginConfig>({
       saveComponents = true;
     }
     if (saveComponents) {
-      await fs.copy([__dirname, '_components'], ['components', 'bcms']);
-      await fs.save(['components', 'bcms', '__v'], componentsVersion);
+      await fs.copy([__dirname, '_components'], ['bcms-components']);
+      await fs.save(['bcms-components', '__v'], componentsVersion);
     }
     const { resolve } = createResolver(import.meta.url);
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url));
