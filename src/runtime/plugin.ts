@@ -4,10 +4,10 @@ import { defineNuxtPlugin } from 'nuxt/app';
 
 export default defineNuxtPlugin(async () => {
   const client = createBcmsClient({
-    cmsOrigin: `${import.meta.env.VITE_BCMS_CMS_ORIGIN}`,
+    cmsOrigin: `${import.meta.env.VITE_BCMS_API_ORIGIN}`,
     key: {
-      id: `${import.meta.env.VITE_BCMS_API_KEY_ID}`,
-      secret: `${import.meta.env.VITE_BCMS_API_KEY_SECRET}`,
+      id: `${import.meta.env.VITE_BCMS_PUB_API_KEY}`,
+      secret: `${import.meta.env.VITE_BCMS_PUB_API_SECRET}`,
     },
     enableCache: import.meta.env.VITE_BCMS_ENABLE_CLIENT_CACHE === 'true',
     debug: import.meta.env.VITE_BCMS_CLIENT_DEBUG === 'true',
