@@ -29,7 +29,7 @@ export default defineNuxtModule<BCMSNuxtPluginConfig>({
     configKey: 'bcms',
   },
   async setup(options, nuxt) {
-    const componentsVersion = 'v1';
+    const componentsVersion = 'v1.1';
     const fs = createFS({
       base: process.cwd(),
     });

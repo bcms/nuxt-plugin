@@ -26,7 +26,7 @@ export const BCMSImage = defineNuxtComponent({
     svg: Boolean,
   },
   setup(props) {
-    const handler = createBcmsImageHandler(props.media, props.options);
+    let handler = createBcmsImageHandler(props.media, props.options);
     const container = ref<HTMLDivElement | null>();
     const srcSet = ref(handler.getSrcSet());
     let mediaBuffer = '';
@@ -51,16 +51,19 @@ export const BCMSImage = defineNuxtComponent({
       if (mediaBuffer !== JSON.stringify(props.media)) {
         mediaBuffer = JSON.stringify(props.media);
         resize = true;
+        handler = createBcmsImageHandler(props.media, props.options);
       }
       if (!props.options && optionsBuffer) {
         optionsBuffer = '';
         resize = true;
+        handler = createBcmsImageHandler(props.media, props.options);
       } else if (
         props.options &&
         optionsBuffer !== JSON.stringify(props.options)
       ) {
         optionsBuffer = JSON.stringify(props.options);
         resize = true;
+        handler = createBcmsImageHandler(props.media, props.options);
       }
       if (resize) {
         resizeHandler();
