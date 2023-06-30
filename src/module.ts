@@ -52,10 +52,10 @@ export default defineNuxtModule<BCMSNuxtPluginConfig>({
     const config = createBcmsNuxtConfig(options);
     if (!config.media) {
       config.media = {
-        output: 'public/bcms-media',
+        output: 'public',
       };
     } else if (!config.media.output) {
-      config.media.output = 'public/bcms-media';
+      config.media.output = 'public';
     }
     if (!bcmsMost) {
       bcmsMost = createBcmsMost({ config });
@@ -83,7 +83,7 @@ export default defineNuxtModule<BCMSNuxtPluginConfig>({
       try {
         if (config.postProcessImages) {
           await bcmsMost.imageProcessor.postBuild({
-            buildOutput: ['dist'],
+            buildOutput: ['.output', 'public'],
           });
         }
         await bcmsMost.server.stop();
@@ -103,9 +103,8 @@ export default defineNuxtModule<BCMSNuxtPluginConfig>({
     nuxt.hook('ready', async () => {
       await setupServer();
     });
-    nuxt.hook('generate:done' as any, async () => {
-      console.log('TEST');
-      done();
+    nuxt.hook('close', async () => {
+      await done();
     });
   },
 });
