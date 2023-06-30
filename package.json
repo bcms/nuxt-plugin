@@ -1,6 +1,6 @@
 {
   "name": "nuxt-plugin-bcms",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "description": "Nuxt plugin for BCMS",
   "main": "./module.js",
   "types": "./index.d.ts",
