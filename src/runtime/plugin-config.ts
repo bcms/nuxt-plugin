@@ -8,19 +8,22 @@ export function useBcmsNuxtPlugin(): BCMSNuxtPlugin {
   return bcmsNuxtPlugin;
 }
 
-export function createBcmsNuxtPlugin(client: BCMSClient): BCMSNuxtPlugin {
+export function createBcmsNuxtPlugin(
+  client: BCMSClient,
+  env: any,
+): BCMSNuxtPlugin {
   if (!bcmsNuxtPlugin) {
     let schema = 'http';
     let domain = 'localhost';
     let port = '3001';
-    if (import.meta.env.VITE_BCMS_MOST_SERVER_PORT) {
-      port = '' + import.meta.env.VITE_BCMS_MOST_SERVER_PORT;
+    if (env.bcmsMostServerPort) {
+      port = '' + env.bcmsMostServerPort;
       if (port === '443') {
         schema = 'https';
       }
     }
-    if (import.meta.env.VITE_BCMS_MOST_SERVER_DOMAIN) {
-      domain = `${import.meta.env.VITE_BCMS_MOST_SERVER_DOMAIN}`
+    if (env.bcmsMostServerDomain) {
+      domain = `${env.bcmsMostServerDomain}`
         .replace('https://', '')
         .replace('http://', '')
         .split(':')[0];

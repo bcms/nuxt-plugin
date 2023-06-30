@@ -2,22 +2,25 @@ import { createBcmsNuxtPlugin } from './plugin-config';
 import { createBcmsClient } from '@becomes/cms-client';
 import { defineNuxtPlugin } from 'nuxt/app';
 
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(async (config) => {
+  const meta = {
+    env: config.$config as any,
+  };
   const client = createBcmsClient({
-    cmsOrigin: `${import.meta.env.VITE_BCMS_API_ORIGIN}`,
+    cmsOrigin: `${meta.env.pubBcmsApiOrigin}`,
     key: {
-      id: `${import.meta.env.VITE_BCMS_PUB_API_KEY}`,
-      secret: `${import.meta.env.VITE_BCMS_PUB_API_SECRET}`,
+      id: `${meta.env.pubBcmsApiKeyId}`,
+      secret: `${meta.env.pubBcmsApiKeySecret}`,
     },
-    enableCache: import.meta.env.VITE_BCMS_ENABLE_CLIENT_CACHE === 'true',
-    debug: import.meta.env.VITE_BCMS_CLIENT_DEBUG === 'true',
+    enableCache: meta.env.bcmsEnableClientCache === 'true',
+    debug: meta.env.bcmsClientDebug === 'true',
     entries: {
-      allowStatuses: import.meta.env.VITE_BCMS_ENTRY_STATUSES
-        ? (import.meta.env.VITE_BCMS_ENTRY_STATUSES as string).split(',')
+      allowStatuses: meta.env.bcmsEntryStatuses
+        ? meta.env.bcmsEntryStatuses.split(',')
         : undefined,
     },
   });
-  const bcmsNuxtPlugin = createBcmsNuxtPlugin(client);
+  const bcmsNuxtPlugin = createBcmsNuxtPlugin(client, meta.env);
   return {
     provide: { bcms: bcmsNuxtPlugin },
   };
