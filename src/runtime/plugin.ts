@@ -4,19 +4,21 @@ import { defineNuxtPlugin } from 'nuxt/app';
 
 export default defineNuxtPlugin(async (config) => {
   const meta = {
-    env: config.$config as any,
+    env: config.$config as {
+      public: any;
+    },
   };
   const client = createBcmsClient({
-    cmsOrigin: `${meta.env.pubBcmsApiOrigin}`,
+    cmsOrigin: `${meta.env.public.pubBcmsApiOrigin}`,
     key: {
-      id: `${meta.env.pubBcmsApiKeyId}`,
-      secret: `${meta.env.pubBcmsApiKeySecret}`,
+      id: `${meta.env.public.pubBcmsApiKeyId}`,
+      secret: `${meta.env.public.pubBcmsApiKeySecret}`,
     },
-    enableCache: meta.env.bcmsEnableClientCache === 'true',
-    debug: meta.env.bcmsClientDebug === 'true',
+    enableCache: meta.env.public.bcmsEnableClientCache === 'true',
+    debug: meta.env.public.bcmsClientDebug === 'true',
     entries: {
-      allowStatuses: meta.env.bcmsEntryStatuses
-        ? meta.env.bcmsEntryStatuses.split(',')
+      allowStatuses: meta.env.public.bcmsEntryStatuses
+        ? meta.env.public.bcmsEntryStatuses.split(',')
         : undefined,
     },
   });

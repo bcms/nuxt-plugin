@@ -16,14 +16,14 @@ export function createBcmsNuxtPlugin(
     let schema = 'http';
     let domain = 'localhost';
     let port = '3001';
-    if (env.bcmsMostServerPort) {
-      port = '' + env.bcmsMostServerPort;
+    if (env.public.bcmsMostServerPort) {
+      port = '' + env.public.bcmsMostServerPort;
       if (port === '443') {
         schema = 'https';
       }
     }
-    if (env.bcmsMostServerDomain) {
-      domain = `${env.bcmsMostServerDomain}`
+    if (env.public.bcmsMostServerDomain) {
+      domain = `${env.public.bcmsMostServerDomain}`
         .replace('https://', '')
         .replace('http://', '')
         .split(':')[0];
