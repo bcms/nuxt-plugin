@@ -9,10 +9,10 @@ export default defineNuxtPlugin(async (config) => {
     },
   };
   const client = createBcmsClient({
-    cmsOrigin: `${meta.env.public.pubBcmsApiOrigin}`,
+    cmsOrigin: `${meta.env.public.bcmsApiOrigin}`,
     key: {
-      id: `${meta.env.public.pubBcmsApiKeyId}`,
-      secret: `${meta.env.public.pubBcmsApiKeySecret}`,
+      id: `${meta.env.public.bcmsApiKeyId}`,
+      secret: `${meta.env.public.bcmsApiKeySecret}`,
     },
     enableCache: meta.env.public.bcmsEnableClientCache === 'true',
     debug: meta.env.public.bcmsClientDebug === 'true',
